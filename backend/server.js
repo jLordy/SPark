@@ -64,7 +64,9 @@ async function initDB() {
                 id_picture    TEXT,                              -- store file path or URL 
                 preferences   JSONB,                             -- flexible user settings (JSON format)
                 is_approved   BOOLEAN DEFAULT FALSE,             -- approval status
-                role          VARCHAR(50) DEFAULT 'user'         -- e.g. "dev", "admin", "user"
+                role          VARCHAR(50) DEFAULT 'user',        -- e.g. "dev", "admin", "user"
+                username      VARCHAR(50) UNIQUE NOT NULL,       -- unique login username
+                password      TEXT NOT NULL                      -- hashed password 
             );
         `
         console.log("Database Initialized successfully")

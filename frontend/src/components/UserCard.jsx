@@ -9,7 +9,7 @@ function UserCard({user}) {
     </figure>
    
      <div className="card-body">
-        <h2>{user.first_name}</h2>
+        <h2 className='font-bakbak'>{user.first_name}</h2>
     </div>
 
     </div>
@@ -18,4 +18,4 @@ function UserCard({user}) {
   )
 }
 
-export default UserCard
+export default UserCard;

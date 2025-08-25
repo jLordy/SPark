@@ -6,7 +6,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        tesla: ['TESLA', 'sans-serif'],
+        bakbak: ['BakbakOne', 'sans-serif'],
+      },
+    },
   },
   plugins: [daisyui],
 }

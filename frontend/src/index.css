@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'TESLA';
+  src: url('/fonts/TESLA.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  
+  font-family: 'BakbakOne';
+  src: url('/fonts/BakbakOneRegular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
