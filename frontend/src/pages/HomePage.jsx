@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useUserStore } from "../store/useUserStore"
 import { PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import UserCard from "../components/UserCard";
+import LoginPage from "./LoginPage";
 function HomePage() {
     const {users, loading, error, fetchUsers} = useUserStore();
 
@@ -10,6 +11,7 @@ function HomePage() {
     }, []);
     console.log("users", users)
     return (
+
         <main className="max-w-6xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
                 <button className="btn btn-primary">

@@ -26,6 +26,8 @@ export const createUser = async (req, res) => {
       preferences,
       is_approved,
       role,
+      username,
+      password
     } = req.body;
 
     const newUser = await sql`
@@ -39,7 +41,9 @@ export const createUser = async (req, res) => {
       id_picture,
       preferences,
       is_approved,
-      role
+      role,
+      username,
+      password
     ) VALUES (
       ${first_name},
       ${middle_name},
@@ -50,7 +54,9 @@ export const createUser = async (req, res) => {
       ${id_picture},
       ${preferences},
       ${is_approved ?? false},
-      ${role ?? "user"}
+      ${role ?? "user"},
+      ${username ?? "user"},
+      ${password ?? "user"}
     )
     RETURNING *;
   `;

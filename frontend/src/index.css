@@ -7,7 +7,9 @@
   src: url('/fonts/TESLA.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
-  
+}
+
+@font-face{
   font-family: 'BakbakOne';
   src: url('/fonts/BakbakOneRegular.woff') format('woff');
   font-weight: normal;

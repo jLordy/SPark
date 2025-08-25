@@ -9,7 +9,7 @@ function UserCard({user}) {
     </figure>
    
      <div className="card-body">
-        <h2 className='font-bakbak'>{user.first_name}</h2>
+        <h2 className='font-tesla'>{user.first_name}</h2>
     </div>
 
     </div>
