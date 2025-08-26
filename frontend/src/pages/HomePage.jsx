@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useUserStore } from "../store/useUserStore"
 import { PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import UserCard from "../components/UserCard";
-import LoginPage from "./LoginPage";
+
 function HomePage() {
     const {users, loading, error, fetchUsers} = useUserStore();
 

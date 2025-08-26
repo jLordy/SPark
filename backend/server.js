@@ -3,6 +3,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path";
+import fs from 'fs';
 
 import userRoutes from "./routes/userRoutes.js"
 import { sql } from "./config/db.js"
@@ -16,6 +18,58 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+
+// Secure static file serving middleware
+app.use("/uploads", (req, res, next) => {
+  // Validate request path to prevent directory traversal
+  const requestedPath = req.path;
+  if (requestedPath.includes('../') || requestedPath.includes('..\\')) {
+    return res.status(400).json({ error: "Invalid request" });
+  }
+
+  // Set security headers
+  const allowedOrigins = process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL] 
+    : ["http://localhost:5173"];
+  
+  if (allowedOrigins.includes(req.headers.origin)) {
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
+  }
+  
+  res.setHeader("Cross-Origin-Resource-Policy", "same-site");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  
+  // Cache headers for production
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  }
+  
+  next();
+});
+
+app.use("/uploads", express.static("uploads", {
+  // Additional security options
+  dotfiles: 'ignore', // ignore dotfiles like .git, .env
+  index: false, // disable directory indexing
+  setHeaders: (res, filePath) => {
+    // Set proper content type based on file extension
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp'
+    };
+    
+    if (mimeTypes[ext]) {
+      res.setHeader('Content-Type', mimeTypes[ext]);
+    }
+  }
+}));
+
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //apply arcjet rate-limit to all routes
 app.use(async (req, res, next) => {

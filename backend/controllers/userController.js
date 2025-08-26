@@ -1,4 +1,5 @@
 import { sql } from "../config/db.js"
+import bcrypt from "bcryptjs";
 
 export const getUsers = async (req, res) => {
     try {
@@ -22,13 +23,19 @@ export const createUser = async (req, res) => {
       position,
       vehicle_type,
       plate_number,
-      id_picture,
       preferences,
       is_approved,
       role,
       username,
       password
     } = req.body;
+
+     // Hash the password before storing
+    const saltRounds = 12; // Higher is more secure but slower
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const id_picture = req.file ? req.file.filename : null; // save filename in DB
+    console.log("Saving filename:", id_picture);
 
     const newUser = await sql`
     INSERT INTO users (
@@ -56,16 +63,15 @@ export const createUser = async (req, res) => {
       ${is_approved ?? false},
       ${role ?? "user"},
       ${username ?? "user"},
-      ${password ?? "user"}
+      ${hashedPassword ?? "user"} 
     )
     RETURNING *;
   `;
+
+    
     console.log("New User Added:", newUser);
 
-    res.status(201).json({
-      sucess: "true",
-      data: newUser[0]
-    });
+    res.status(201).json({ success: true, data: newUser[0]});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -94,14 +100,24 @@ export const updateUser = async (req, res) => {
     position,
     vehicle_type,
     plate_number,
-    id_picture,
+    id_picture_filename,
     preferences,
     is_approved,
     role,
+    password,
+    username
   } = req.body;
-
   try {
-    const updatedUser = await sql`
+    let hashedPassword;
+    if (password){
+      const saltRounds = 12;
+      hashedPassword = await bcrypt.hash(password, saltRounds);
+    }
+  } catch (error) {
+    
+  }
+  try {
+     const updatedUser = await sql`
       UPDATE users
       SET 
         first_name   = COALESCE(${first_name}, first_name),
@@ -110,10 +126,11 @@ export const updateUser = async (req, res) => {
         position     = COALESCE(${position}, position),
         vehicle_type = COALESCE(${vehicle_type}, vehicle_type),
         plate_number = COALESCE(${plate_number}, plate_number),
-        id_picture   = COALESCE(${id_picture}, id_picture),
+        id_picture   = COALESCE(${id_picture_filename}, id_picture),
         preferences  = COALESCE(${preferences}, preferences),
         is_approved  = COALESCE(${is_approved}, is_approved),
-        role         = COALESCE(${role}, role)
+        role         = COALESCE(${role}, role),
+        password     = COALESCE(${hashedPassword}, password) 
       WHERE user_id = ${id}
       RETURNING *;
     `;
