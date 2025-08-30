@@ -1,41 +1,42 @@
 import { useEffect } from "react";
 import { useUserStore } from "../store/useUserStore"
-import { PlusCircleIcon, RefreshCwIcon } from "lucide-react";
-import UserCard from "../components/UserCard";
+import LayoutWithSidebar from "../components/LayoutWithSidebar";
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 
 function HomePage() {
-    const {users, loading, error, fetchUsers} = useUserStore();
+    const { users, loading, error, fetchUsers } = useUserStore();
+    const { user } = useAuth(); // Get the logged-in user from AuthContext
 
     useEffect(() => {
         fetchUsers()
     }, []);
-    console.log("users", users)
-    return (
+    
+    console.log("users", users);
+    console.log("loggedIn user", user); // This will show the currently logged-in user
 
+    return (
         <main className="max-w-6xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
-                <button className="btn btn-primary">
-                    <PlusCircleIcon className="size-5 mr-2"/>
-                    Add User
-                </button>
-                <button className="btn btn-ghost btn-circle" onClick={fetchUsers}>
-                    <RefreshCwIcon className="size-5 mr-2"/>
-                </button>
-            </div>
-            
-            {error && <div className="alert alert-error mb-8">{error}</div>}
-            
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="loading loading-spinner loading-lg"/>
+           <LayoutWithSidebar>
+                <div className="max-w-4xl mx-auto">
+                    <h1 className="text-3xl font-bold mb-6">Welcome to SPARK</h1>
+                    <div className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-xl font-semibold mb-4">Your Parking Solution</h2>
+                    <p className="text-gray-600">
+                        Find and reserve parking spots easily with our platform.
+                        {user ? ` Welcome back, ${user.first_name || user.username}!` : ' Please login to access more features.'}
+                    </p>
+                    
+                    {/* Debug info - you can remove this later */}
+                    {user && (
+                      <div className="mt-4 p-3 bg-gray-100 rounded">
+                        <p className="text-sm text-gray-600">
+                          Debug: User loaded - {user.first_name} {user.last_name} ({user.role})
+                        </p>
+                      </div>
+                    )}
+                    </div>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users.map((user) => (
-                        <UserCard key={user.id} user={user}/>
-                    ))}
-                </div>
-            )}
+            </LayoutWithSidebar>
         </main>
     )
 }

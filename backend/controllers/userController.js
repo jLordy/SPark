@@ -31,7 +31,7 @@ export const createUser = async (req, res) => {
     } = req.body;
 
      // Hash the password before storing
-    const saltRounds = 12; // Higher is more secure but slower
+    const saltRounds = 10; // Higher is more secure but slower
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const id_picture = req.file ? req.file.filename : null; // save filename in DB
@@ -67,8 +67,6 @@ export const createUser = async (req, res) => {
     )
     RETURNING *;
   `;
-
-    
     console.log("New User Added:", newUser);
 
     res.status(201).json({ success: true, data: newUser[0]});
@@ -107,17 +105,22 @@ export const updateUser = async (req, res) => {
     password,
     username
   } = req.body;
-  try {
-    let hashedPassword;
-    if (password){
+
+  let hashedPassword = null;
+
+  // Hash password if provided
+  if (password) {
+    try {
       const saltRounds = 12;
       hashedPassword = await bcrypt.hash(password, saltRounds);
+    } catch (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).json({ success: false, message: "Failed to hash password" });
     }
-  } catch (error) {
-    
   }
+
   try {
-     const updatedUser = await sql`
+    const updatedUser = await sql`
       UPDATE users
       SET 
         first_name   = COALESCE(${first_name}, first_name),
@@ -130,7 +133,8 @@ export const updateUser = async (req, res) => {
         preferences  = COALESCE(${preferences}, preferences),
         is_approved  = COALESCE(${is_approved}, is_approved),
         role         = COALESCE(${role}, role),
-        password     = COALESCE(${hashedPassword}, password) 
+        password     = COALESCE(${hashedPassword}, password),
+        username     = COALESCE(${username}, username)
       WHERE user_id = ${id}
       RETURNING *;
     `;
@@ -148,7 +152,6 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 export const deleteUser = async (req, res) => {
     const { id } = req.params;
 
