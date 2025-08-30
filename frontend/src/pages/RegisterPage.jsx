@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/useUserStore";
 import { useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function RegisterPage() {
-  // Zustand store hooks
   const createUser = useUserStore((state) => state.createUser);
   const loading = useUserStore((state) => state.loading);
   const error = useUserStore((state) => state.error);
-  
-  // Navigation
   const navigate = useNavigate();
-  
-  // Refs and state
-  const fileInputRef = useRef(null);
+  const { login } = useAuth(); // use AuthContext
   const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     first_name: "",
     middle_name: "",
@@ -27,12 +25,7 @@ export default function RegisterPage() {
     password: "",
   });
 
-  // Constants
-  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-  // Handler functions
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -42,152 +35,55 @@ export default function RegisterPage() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-
     if (!file) {
       setImagePreview(null);
       return;
     }
 
-    // Validate file type
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, GIF, WEBP)');
-      e.target.value = '';
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please select a valid image file (JPEG, PNG, GIF, WEBP)");
+      e.target.value = "";
       setImagePreview(null);
       return;
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      alert('File size must be less than 5MB');
-      e.target.value = '';
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert("File size must be less than 5MB");
+      e.target.value = "";
       setImagePreview(null);
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target.result);
-    };
+    reader.onload = (e) => setImagePreview(e.target.result);
     reader.readAsDataURL(file);
 
-    // Update form data
-    handleInputChange(e);
+    handleChange(e);
   };
 
   const removeImage = () => {
     setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    setFormData(prev => ({ ...prev, id_picture: null }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createUser(formData);
+      // Call Zustand to create user (handles FormData)
+      const user = await createUser(formData);
+
+      // After success, log in the user via AuthContext
+      const token = user.token  
+      login(user, token);
+
+      // Redirect to dashboard or home
       navigate("/");
     } catch (err) {
       console.error("Register failed", err);
     }
   };
-
-  // Form field components for better organization
-  const TextInput = ({ name, label, placeholder, required = false, spanFull = false }) => (
-    <div className={`form-control ${spanFull ? 'md:col-span-2' : ''}`}>
-      <label className="label">
-        <span className="label-text text-gray-100">{label}</span>
-      </label>
-      <input
-        name={name}
-        type="text"
-        placeholder={placeholder}
-        className="input input-bordered w-full"
-        required={required}
-        onChange={handleInputChange}
-      />
-    </div>
-  );
-
-  const SelectInput = ({ name, label, options, required = false, spanFull = false }) => (
-    <div className={`form-control ${spanFull ? 'md:col-span-2' : ''}`}>
-      <label className="label">
-        <span className="label-text text-gray-100">{label}</span>
-      </label>
-      <select 
-        name={name} 
-        className="select select-bordered w-full" 
-        required={required} 
-        onChange={handleInputChange}
-        defaultValue=""
-      >
-        <option value="" disabled>Select your {label.toLowerCase()}</option>
-        {options.map(option => (
-          <option key={option} value={option}>{option}</option>
-        ))}
-      </select>
-    </div>
-  );
-
-  const ImageUpload = () => (
-    <div className="form-control md:col-span-2">
-      <label className="label">
-        <span className="text-gray-100">ID Picture</span>
-      </label>
-      
-      <input 
-        ref={fileInputRef}
-        name="id_picture" 
-        type="file" 
-        className="file-input file-input-bordered w-full text-gray-100" 
-        onChange={handleImageChange}
-        accept={ALLOWED_IMAGE_TYPES.join(',')}
-      />
-      
-      <label className="label">
-        <span className="text-gray-400 text-sm">
-          Accepted: JPEG, PNG, GIF, WEBP (Max 5MB)
-        </span>
-      </label>
-
-      {imagePreview && (
-        <div className="mt-4 relative">
-          <div className="relative inline-block">
-            <img 
-              src={imagePreview} 
-              alt="Preview" 
-              className="w-48 h-48 object-cover rounded-lg border-2 border-gray-300"
-            />
-            <button
-              type="button"
-              onClick={removeImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-              aria-label="Remove image"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const PasswordInput = () => (
-    <div className="form-control md:col-span-2">
-      <label className="label">
-        <span className="label-text text-gray-100">Password</span>
-      </label>
-      <input 
-        name="password" 
-        type="password" 
-        placeholder="Enter password" 
-        className="input input-bordered w-full" 
-        required 
-        onChange={handleInputChange}
-      />
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brandGray to-brandBlack font-bakbak tracking-wide flex flex-col">
@@ -205,52 +101,204 @@ export default function RegisterPage() {
             <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-center text-gray-100 tracking-wide">
               Register
             </h2>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" onSubmit={handleSubmit}>
+                {/* First Name */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-gray-100">First Name</span>
+                  </label>
+                  <input
+                    name="first_name"
+                    type="text"
+                    placeholder="Enter first name"
+                    className="input input-bordered w-full"
+                    required
+                    onChange={handleChange}
+                  />
+                </div>
 
-            {/* Form */}
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" onSubmit={handleSubmit}>
-              <TextInput name="first_name" label="First Name" placeholder="Enter first name" required />
-              <TextInput name="middle_name" label="Middle Name" placeholder="Enter middle name" />
-              <TextInput name="last_name" label="Last Name" placeholder="Enter last name" required spanFull />
-              
-              <SelectInput 
-                name="position" 
-                label="Position" 
-                options={["Student", "Faculty", "Staff", "Visitor"]} 
-                required 
-                spanFull 
-              />
-              
-              <SelectInput 
-                name="preferences" 
-                label="Preferences" 
-                options={["Near Entrance", "Covered Parking", "Accessible Parking", "Motorcycle Zone"]} 
-                spanFull 
-              />
-              
-              <SelectInput 
-                name="vehicle_type" 
-                label="Vehicle Type" 
-                options={["Car", "Motorcycle", "Van", "Truck"]} 
-              />
-              
-              <TextInput name="plate_no" label="Plate No." placeholder="Enter plate number" />
-              
-              <ImageUpload />
-              
-              <TextInput name="username" label="Username" placeholder="Choose a username" required spanFull />
-              
-              <PasswordInput />
+                {/* Middle Name */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Middle Name</span>
+                  </label>
+                  <input
+                    name="middle_name"
+                    type="text"
+                    placeholder="Enter middle name"
+                    className="input input-bordered w-full"
+                    onChange={handleChange}
+                  />
+                </div>
 
-              <div className="form-control md:col-span-2 mt-2 sm:mt-4">
-                <button 
-                  type="submit" 
-                  disabled={loading} 
-                  className="py-3 sm:py-4 btn-lg w-full bg-green-600 hover:bg-green-700 text-gray-200 text-base sm:text-lg normal-case tracking-wider"
-                >
-                  {loading ? "Signing Up..." : "Sign Up"}
-                </button>
-              </div>
-            </form>
+                {/* Last Name */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Last Name</span>
+                  </label>
+                  <input
+                    name="last_name"
+                    type="text"
+                    placeholder="Enter last name"
+                    className="input input-bordered w-full"
+                    required
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Position */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Position</span>
+                  </label>
+                  <select
+                    name="position"
+                    className="select select-bordered w-full"
+                    required
+                    onChange={handleChange}
+                  >
+                    <option disabled selected>Select your position</option>
+                    <option>Student</option>
+                    <option>Faculty</option>
+                    <option>Staff</option>
+                    <option>Visitor</option>
+                  </select>
+                </div>
+
+                {/* Preferences */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Preferences</span>
+                  </label>
+                  <select
+                    name="preferences"
+                    className="select select-bordered w-full"
+                    onChange={handleChange}
+                  >
+                    <option disabled selected>Select your parking preference</option>
+                    <option>Near Entrance</option>
+                    <option>Covered Parking</option>
+                    <option>Accessible Parking</option>
+                    <option>Motorcycle Zone</option>
+                  </select>
+                </div>
+
+                {/* Vehicle Type */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-gray-200">Vehicle Type</span>
+                  </label>
+                  <select
+                    name="vehicle_type"
+                    className="select select-bordered w-full"
+                    onChange={handleChange}
+                  >
+                    <option disabled selected>Choose vehicle type</option>
+                    <option>Car</option>
+                    <option>Motorcycle</option>
+                    <option>Van</option>
+                    <option>Truck</option>
+                  </select>
+                </div>
+
+                {/* Plate Number */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Plate No.</span>
+                  </label>
+                  <input
+                    name="plate_no"
+                    type="text"
+                    placeholder="Enter plate number"
+                    className="input input-bordered w-full"
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* ID Picture */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="text-gray-100">ID Picture</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    name="id_picture"
+                    type="file"
+                    className="file-input file-input-bordered w-full text-gray-100"
+                    onChange={handleImageChange}
+                    accept="image/jpeg,image/png,image/gif,image/webp,image/jpg"
+                  />
+                  <label className="label">
+                    <span className="text-gray-400 text-sm">
+                      Accepted: JPEG, PNG, GIF, WEBP (Max 5MB)
+                    </span>
+                  </label>
+
+                  {/* Image Preview */}
+                  {imagePreview && (
+                    <div className="mt-4 relative">
+                      <div className="relative inline-block">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-48 h-48 object-cover rounded-lg border-2 border-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                          aria-label="Remove image"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Username */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Username</span>
+                  </label>
+                  <input
+                    name="username"
+                    type="text"
+                    placeholder="Choose a username"
+                    className="input input-bordered w-full"
+                    required
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Password */}
+                <div className="form-control md:col-span-2">
+                  <label className="label">
+                    <span className="label-text text-gray-100">Password</span>
+                  </label>
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="Enter password"
+                    className="input input-bordered w-full"
+                    required
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <div className="form-control md:col-span-2 mt-2 sm:mt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="py-3 sm:py-4 btn-lg w-full bg-green-600 hover:bg-green-700 text-gray-200 text-base sm:text-lg normal-case tracking-wider"
+                  >
+                    {loading ? "Signing Up..." : "Sign Up"}
+                  </button>
+                </div>
+              </form>
+
+             
 
             {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
 
