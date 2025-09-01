@@ -15,7 +15,10 @@ export const useUserStore = create((set, get) => ({
       const response = await axios.get(BASE_URL);
       set({ users: response.data.data, error: null });
     } catch (err) {
-      set({ error: err.response?.data?.message || err.message || "Failed to fetch users" });
+      set({
+        error:
+          err.response?.data?.message || err.message || "Failed to fetch users",
+      });
     } finally {
       set({ loading: false });
     }
@@ -26,7 +29,9 @@ export const useUserStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const payload = new FormData();
-      Object.entries(formData).forEach(([key, value]) => payload.append(key, value));
+      Object.entries(formData).forEach(([key, value]) =>
+        payload.append(key, value)
+      );
 
       const res = await axios.post(`${BASE_URL}`, payload, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -36,7 +41,10 @@ export const useUserStore = create((set, get) => ({
       await get().fetchUsers();
       return res.data.data;
     } catch (err) {
-      set({ error: err.response?.data?.message || err.message || "Failed to create user" });
+      set({
+        error:
+          err.response?.data?.message || err.message || "Failed to create user",
+      });
       throw err;
     } finally {
       set({ loading: false });
@@ -48,7 +56,9 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axios.put(`${BASE_URL}/${userId}`, { role });
       set((state) => ({
-        users: state.users.map((u) => (u.user_id === userId ? res.data.data : u)),
+        users: state.users.map((u) =>
+          u.user_id === userId ? res.data.data : u
+        ),
         error: null,
       }));
     } catch (err) {
@@ -61,9 +71,13 @@ export const useUserStore = create((set, get) => ({
   updateUserApproval: async (userId, isApproved) => {
     set({ loading: true });
     try {
-      const res = await axios.put(`${BASE_URL}/${userId}`, { is_approved: isApproved });
+      const res = await axios.put(`${BASE_URL}/${userId}`, {
+        is_approved: isApproved,
+      });
       set((state) => ({
-        users: state.users.map((u) => (u.user_id === userId ? res.data.data : u)),
+        users: state.users.map((u) =>
+          u.user_id === userId ? res.data.data : u
+        ),
         error: null,
       }));
     } catch (err) {

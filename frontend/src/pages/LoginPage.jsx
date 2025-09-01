@@ -6,18 +6,17 @@ import { useAuth } from "../context/AuthContext";
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth(); // Get login function from AuthContext
 
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
     setError(""); // Clear error when user starts typing
   };
@@ -33,15 +32,15 @@ export default function LoginPage() {
         formData,
         {
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
       if (response.data.success) {
         // Save user and token in context
-         login(response.data.data.user, response.data.data.token);
-        
+        login(response.data.data.user, response.data.data.token);
+
         // Redirect to home page
         navigate("/");
       }
@@ -76,12 +75,22 @@ export default function LoginPage() {
             <h2 className="text-2xl font-semibold mb-4 text-left text-white">
               Log In
             </h2>
-            
+
             {/* Error Message */}
             {error && (
               <div className="alert alert-error mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-current shrink-0 h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span>{error}</span>
               </div>

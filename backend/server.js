@@ -1,13 +1,13 @@
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import cors from "cors"
-import dotenv from "dotenv"
+import cors from "cors";
+import dotenv from "dotenv";
 import path from "path";
-import fs from 'fs';
+import fs from "fs";
 
-import userRoutes from "./routes/userRoutes.js"
-import { sql } from "./config/db.js"
+import userRoutes from "./routes/userRoutes.js";
+import { sql } from "./config/db.js";
 import { aj } from "./lib/arcjet.js";
 dotenv.config();
 
@@ -23,90 +23,98 @@ app.use(morgan("dev"));
 app.use("/uploads", (req, res, next) => {
   // Validate request path to prevent directory traversal
   const requestedPath = req.path;
-  if (requestedPath.includes('../') || requestedPath.includes('..\\')) {
+  if (requestedPath.includes("../") || requestedPath.includes("..\\")) {
     return res.status(400).json({ error: "Invalid request" });
   }
 
   // Set security headers
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
-    : ["http://localhost:5173"];
-  
+  const allowedOrigins =
+    process.env.NODE_ENV === "production"
+      ? [process.env.FRONTEND_URL]
+      : ["http://localhost:5173"];
+
   if (allowedOrigins.includes(req.headers.origin)) {
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
   }
-  
+
   res.setHeader("Cross-Origin-Resource-Policy", "same-site");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
-  
+
   // Cache headers for production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   }
-  
+
   next();
 });
 
-app.use("/uploads", express.static("uploads", {
-  // Additional security options
-  dotfiles: 'ignore', // ignore dotfiles like .git, .env
-  index: false, // disable directory indexing
-  setHeaders: (res, filePath) => {
-    // Set proper content type based on file extension
-    const ext = path.extname(filePath).toLowerCase();
-    const mimeTypes = {
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.gif': 'image/gif',
-      '.webp': 'image/webp'
-    };
-    
-    if (mimeTypes[ext]) {
-      res.setHeader('Content-Type', mimeTypes[ext]);
-    }
-  }
-}));
+app.use(
+  "/uploads",
+  express.static("uploads", {
+    // Additional security options
+    dotfiles: "ignore", // ignore dotfiles like .git, .env
+    index: false, // disable directory indexing
+    setHeaders: (res, filePath) => {
+      // Set proper content type based on file extension
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".gif": "image/gif",
+        ".webp": "image/webp",
+      };
+
+      if (mimeTypes[ext]) {
+        res.setHeader("Content-Type", mimeTypes[ext]);
+      }
+    },
+  })
+);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //apply arcjet rate-limit to all routes
 app.use(async (req, res, next) => {
-    try {
-        const decision = await aj.protect(req, {
-            requested: 1 //specifies that each request consumes 1 token
-        })
+  try {
+    const decision = await aj.protect(req, {
+      requested: 1, //specifies that each request consumes 1 token
+    });
 
-        if(decision.isDenied()){
-            if(decision.reason.isRateLimit()){
-                res.status(429).json({ error: "Too Many Requests" });
-            } else if (decision.reason.isBot()){
-                res.status(403).json({ error: "Bot Access Denied" });
-            } else {
-                res.status(403).json({ error: "Forbidden" })
-            }
-            return 
-        }
-        
-        //check for spoofed bots
-        if(decision.results.some((result) => result.reason.isBot() && result.reason.isSpoofed())) {
-            res.status(403).json({ error: "Spoofed bot detected" });
-            return;
-        }
-
-        next();
-    } catch (error) {
-        console.log("Arcjet error", error);
-        next(error);
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        res.status(429).json({ error: "Too Many Requests" });
+      } else if (decision.reason.isBot()) {
+        res.status(403).json({ error: "Bot Access Denied" });
+      } else {
+        res.status(403).json({ error: "Forbidden" });
+      }
+      return;
     }
-})
+
+    //check for spoofed bots
+    if (
+      decision.results.some(
+        (result) => result.reason.isBot() && result.reason.isSpoofed()
+      )
+    ) {
+      res.status(403).json({ error: "Spoofed bot detected" });
+      return;
+    }
+
+    next();
+  } catch (error) {
+    console.log("Arcjet error", error);
+    next(error);
+  }
+});
 
 app.use("/api/users", userRoutes);
 
 async function initDB() {
-    try {
-        await sql `
+  try {
+    await sql`
             CREATE TABLE IF NOT EXISTS users (
                 user_id       SERIAL PRIMARY KEY,                -- unique user identifier
                 first_name    VARCHAR(50) NOT NULL,              -- given name
@@ -122,16 +130,15 @@ async function initDB() {
                 username      VARCHAR(50) UNIQUE NOT NULL,       -- unique login username
                 password      TEXT NOT NULL                      -- hashed password 
             );
-        `
-        console.log("Database Initialized successfully")
-    } catch (error) {
-        console.log("Error initDB", error);
-    }
+        `;
+    console.log("Database Initialized successfully");
+  } catch (error) {
+    console.log("Error initDB", error);
+  }
 }
 
 initDB().then(() => {
-    app.listen(PORT, () => {
-        console.log("Server is running on port " + PORT);
-    })
+  app.listen(PORT, () => {
+    console.log("Server is running on port " + PORT);
+  });
 });
-

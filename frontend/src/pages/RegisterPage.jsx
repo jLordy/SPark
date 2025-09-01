@@ -40,7 +40,13 @@ export default function RegisterPage() {
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/jpg"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/jpg",
+    ];
     if (!allowedTypes.includes(file.type)) {
       alert("Please select a valid image file (JPEG, PNG, GIF, WEBP)");
       e.target.value = "";
@@ -75,7 +81,7 @@ export default function RegisterPage() {
       const user = await createUser(formData);
 
       // After success, log in the user via AuthContext
-      const token = user.token  
+      const token = user.token;
       login(user, token);
 
       // Redirect to dashboard or home
@@ -101,209 +107,219 @@ export default function RegisterPage() {
             <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-center text-gray-100 tracking-wide">
               Register
             </h2>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" onSubmit={handleSubmit}>
-                {/* First Name */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text text-gray-100">First Name</span>
-                  </label>
-                  <input
-                    name="first_name"
-                    type="text"
-                    placeholder="Enter first name"
-                    className="input input-bordered w-full"
-                    required
-                    onChange={handleChange}
-                  />
-                </div>
+            <form
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6"
+              onSubmit={handleSubmit}
+            >
+              {/* First Name */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-100">First Name</span>
+                </label>
+                <input
+                  name="first_name"
+                  type="text"
+                  placeholder="Enter first name"
+                  className="input input-bordered w-full"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* Middle Name */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Middle Name</span>
-                  </label>
-                  <input
-                    name="middle_name"
-                    type="text"
-                    placeholder="Enter middle name"
-                    className="input input-bordered w-full"
-                    onChange={handleChange}
-                  />
-                </div>
+              {/* Middle Name */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-100">Middle Name</span>
+                </label>
+                <input
+                  name="middle_name"
+                  type="text"
+                  placeholder="Enter middle name"
+                  className="input input-bordered w-full"
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* Last Name */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Last Name</span>
-                  </label>
-                  <input
-                    name="last_name"
-                    type="text"
-                    placeholder="Enter last name"
-                    className="input input-bordered w-full"
-                    required
-                    onChange={handleChange}
-                  />
-                </div>
+              {/* Last Name */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-gray-100">Last Name</span>
+                </label>
+                <input
+                  name="last_name"
+                  type="text"
+                  placeholder="Enter last name"
+                  className="input input-bordered w-full"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* Position */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Position</span>
-                  </label>
-                  <select
-                    name="position"
-                    className="select select-bordered w-full"
-                    required
-                    onChange={handleChange}
-                  >
-                    <option disabled selected>Select your position</option>
-                    <option>Student</option>
-                    <option>Faculty</option>
-                    <option>Staff</option>
-                    <option>Visitor</option>
-                  </select>
-                </div>
+              {/* Position */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-gray-100">Position</span>
+                </label>
+                <select
+                  name="position"
+                  className="select select-bordered w-full"
+                  required
+                  onChange={handleChange}
+                >
+                  <option disabled selected>
+                    Select your position
+                  </option>
+                  <option>Student</option>
+                  <option>Faculty</option>
+                  <option>Staff</option>
+                  <option>Visitor</option>
+                </select>
+              </div>
 
-                {/* Preferences */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Preferences</span>
-                  </label>
-                  <select
-                    name="preferences"
-                    className="select select-bordered w-full"
-                    onChange={handleChange}
-                  >
-                    <option disabled selected>Select your parking preference</option>
-                    <option>Near Entrance</option>
-                    <option>Covered Parking</option>
-                    <option>Accessible Parking</option>
-                    <option>Motorcycle Zone</option>
-                  </select>
-                </div>
+              {/* Preferences */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-gray-100">Preferences</span>
+                </label>
+                <select
+                  name="preferences"
+                  className="select select-bordered w-full"
+                  onChange={handleChange}
+                >
+                  <option disabled selected>
+                    Select your parking preference
+                  </option>
+                  <option>Near Entrance</option>
+                  <option>Covered Parking</option>
+                  <option>Accessible Parking</option>
+                  <option>Motorcycle Zone</option>
+                </select>
+              </div>
 
-                {/* Vehicle Type */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text text-gray-200">Vehicle Type</span>
-                  </label>
-                  <select
-                    name="vehicle_type"
-                    className="select select-bordered w-full"
-                    onChange={handleChange}
-                  >
-                    <option disabled selected>Choose vehicle type</option>
-                    <option>Car</option>
-                    <option>Motorcycle</option>
-                    <option>Van</option>
-                    <option>Truck</option>
-                  </select>
-                </div>
+              {/* Vehicle Type */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-200">Vehicle Type</span>
+                </label>
+                <select
+                  name="vehicle_type"
+                  className="select select-bordered w-full"
+                  onChange={handleChange}
+                >
+                  <option disabled selected>
+                    Choose vehicle type
+                  </option>
+                  <option>Car</option>
+                  <option>Motorcycle</option>
+                  <option>Van</option>
+                  <option>Truck</option>
+                </select>
+              </div>
 
-                {/* Plate Number */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Plate No.</span>
-                  </label>
-                  <input
-                    name="plate_no"
-                    type="text"
-                    placeholder="Enter plate number"
-                    className="input input-bordered w-full"
-                    onChange={handleChange}
-                  />
-                </div>
+              {/* Plate Number */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-100">Plate No.</span>
+                </label>
+                <input
+                  name="plate_no"
+                  type="text"
+                  placeholder="Enter plate number"
+                  className="input input-bordered w-full"
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* ID Picture */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="text-gray-100">ID Picture</span>
-                  </label>
-                  <input
-                    ref={fileInputRef}
-                    name="id_picture"
-                    type="file"
-                    className="file-input file-input-bordered w-full text-gray-100"
-                    onChange={handleImageChange}
-                    accept="image/jpeg,image/png,image/gif,image/webp,image/jpg"
-                  />
-                  <label className="label">
-                    <span className="text-gray-400 text-sm">
-                      Accepted: JPEG, PNG, GIF, WEBP (Max 5MB)
-                    </span>
-                  </label>
+              {/* ID Picture */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="text-gray-100">ID Picture</span>
+                </label>
+                <input
+                  ref={fileInputRef}
+                  name="id_picture"
+                  type="file"
+                  className="file-input file-input-bordered w-full text-gray-100"
+                  onChange={handleImageChange}
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/jpg"
+                />
+                <label className="label">
+                  <span className="text-gray-400 text-sm">
+                    Accepted: JPEG, PNG, GIF, WEBP (Max 5MB)
+                  </span>
+                </label>
 
-                  {/* Image Preview */}
-                  {imagePreview && (
-                    <div className="mt-4 relative">
-                      <div className="relative inline-block">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-48 h-48 object-cover rounded-lg border-2 border-gray-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeImage}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-                          aria-label="Remove image"
-                        >
-                          ×
-                        </button>
-                      </div>
+                {/* Image Preview */}
+                {imagePreview && (
+                  <div className="mt-4 relative">
+                    <div className="relative inline-block">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-48 h-48 object-cover rounded-lg border-2 border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                        aria-label="Remove image"
+                      >
+                        ×
+                      </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                {/* Username */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Username</span>
-                  </label>
-                  <input
-                    name="username"
-                    type="text"
-                    placeholder="Choose a username"
-                    className="input input-bordered w-full"
-                    required
-                    onChange={handleChange}
-                  />
-                </div>
+              {/* Username */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-gray-100">Username</span>
+                </label>
+                <input
+                  name="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  className="input input-bordered w-full"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* Password */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text text-gray-100">Password</span>
-                  </label>
-                  <input
-                    name="password"
-                    type="password"
-                    placeholder="Enter password"
-                    className="input input-bordered w-full"
-                    required
-                    onChange={handleChange}
-                  />
-                </div>
+              {/* Password */}
+              <div className="form-control md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-gray-100">Password</span>
+                </label>
+                <input
+                  name="password"
+                  type="password"
+                  placeholder="Enter password"
+                  className="input input-bordered w-full"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
 
-                {/* Submit Button */}
-                <div className="form-control md:col-span-2 mt-2 sm:mt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="py-3 sm:py-4 btn-lg w-full bg-green-600 hover:bg-green-700 text-gray-200 text-base sm:text-lg normal-case tracking-wider"
-                  >
-                    {loading ? "Signing Up..." : "Sign Up"}
-                  </button>
-                </div>
-              </form>
-
-             
+              {/* Submit Button */}
+              <div className="form-control md:col-span-2 mt-2 sm:mt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="py-3 sm:py-4 btn-lg w-full bg-green-600 hover:bg-green-700 text-gray-200 text-base sm:text-lg normal-case tracking-wider"
+                >
+                  {loading ? "Signing Up..." : "Sign Up"}
+                </button>
+              </div>
+            </form>
 
             {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
 
             <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-100">
-              Already have an account? <Link to="/" className="link link-primary">Log In</Link>
+              Already have an account?{" "}
+              <Link to="/" className="link link-primary">
+                Log In
+              </Link>
             </p>
           </div>
         </div>

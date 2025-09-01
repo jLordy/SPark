@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 import { sql } from "../config/db.js";
 
-
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -13,7 +12,7 @@ export const loginUser = async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: "Username and password are required"
+        message: "Username and password are required",
       });
     }
 
@@ -25,7 +24,7 @@ export const loginUser = async (req, res) => {
     if (users.length === 0) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -33,24 +32,24 @@ export const loginUser = async (req, res) => {
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
     // Create JWT token with approval status included
     const token = jwt.sign(
-      { 
-        userId: user.user_id, 
+      {
+        userId: user.user_id,
         username: user.username,
         role: user.role,
-        is_approved: user.is_approved // Include approval status in token
+        is_approved: user.is_approved, // Include approval status in token
       },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: "24h" }
     );
 
     // Return user data (excluding password) and token
@@ -58,19 +57,20 @@ export const loginUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: user.is_approved ? "Login successful" : "Login successful - Account pending approval",
+      message: user.is_approved
+        ? "Login successful"
+        : "Login successful - Account pending approval",
       data: {
         user: userWithoutPassword,
         token,
-        is_approved: user.is_approved // Send approval status to frontend
-      }
+        is_approved: user.is_approved, // Send approval status to frontend
+      },
     });
-
   } catch (error) {
     console.error("Error in loginUser function", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };

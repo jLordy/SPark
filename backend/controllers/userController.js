@@ -1,19 +1,17 @@
-import { sql } from "../config/db.js"
+import { sql } from "../config/db.js";
 import bcrypt from "bcryptjs";
 
 export const getUsers = async (req, res) => {
-    try {
-        const users = await sql`
+  try {
+    const users = await sql`
             SELECT * FROM users
             ORDER BY user_id ASC
         `;
-        
-        console.log("fetched users", users);
-        res.status(200).json({success:true, data:users});
-    } catch (error) {
-        
-    }
-} 
+
+    console.log("fetched users", users);
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {}
+};
 export const createUser = async (req, res) => {
   try {
     const {
@@ -27,10 +25,10 @@ export const createUser = async (req, res) => {
       is_approved,
       role,
       username,
-      password
+      password,
     } = req.body;
 
-     // Hash the password before storing
+    // Hash the password before storing
     const saltRounds = 10; // Higher is more secure but slower
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -69,26 +67,26 @@ export const createUser = async (req, res) => {
   `;
     console.log("New User Added:", newUser);
 
-    res.status(201).json({ success: true, data: newUser[0]});
+    res.status(201).json({ success: true, data: newUser[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 export const getUser = async (req, res) => {
-    const {id } = req.params
-    
-    try {
-        const user = await sql`
+  const { id } = req.params;
+
+  try {
+    const user = await sql`
             SELECT * FROM users WHERE user_id=${id}
         `;
 
-        res.status(200).json({ success:true, data: user[0]})
-    } catch (error) {
-        console.log("Error in getUser function", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-    }
-}
+    res.status(200).json({ success: true, data: user[0] });
+  } catch (error) {
+    console.log("Error in getUser function", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 export const updateUser = async (req, res) => {
   const { id } = req.params;
   const {
@@ -103,7 +101,7 @@ export const updateUser = async (req, res) => {
     is_approved,
     role,
     password,
-    username
+    username,
   } = req.body;
 
   let hashedPassword = null;
@@ -115,7 +113,9 @@ export const updateUser = async (req, res) => {
       hashedPassword = await bcrypt.hash(password, saltRounds);
     } catch (err) {
       console.error("Error hashing password:", err);
-      return res.status(500).json({ success: false, message: "Failed to hash password" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to hash password" });
     }
   }
 
@@ -153,23 +153,23 @@ export const updateUser = async (req, res) => {
   }
 };
 export const deleteUser = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const deletedUser = await sql`
+  try {
+    const deletedUser = await sql`
             DELETE FROM users WHERE user_id=${id}
             RETURNING *
         `;
-        
-         if(deletedUser.length === 0){
-            return res.status(404).json({
-                success: false,
-                message: "User not found"    
-            });
-        }
-        res.status(200).json({ success: true, data: deletedUser[0] });
-    } catch (error) {
-        console.log("Error in deleteUser function", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+
+    if (deletedUser.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+    res.status(200).json({ success: true, data: deletedUser[0] });
+  } catch (error) {
+    console.log("Error in deleteUser function", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };
